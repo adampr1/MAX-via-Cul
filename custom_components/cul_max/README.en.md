@@ -131,6 +131,8 @@ To pair:
 Radiator and wall thermostats expose:
 
 - A `climate` entity for target temperature and HVAC mode.
+- Radiator thermostats only: a `Valve Position` sensor (0–100 %). It replaces the
+  former `valve_position` attribute of the climate entity (since 0.3.0).
 - `text` entities for weekly schedules.
 - `number` entities for comfort, eco and window-open temperatures,
   window-open duration and measurement offset.
@@ -147,6 +149,14 @@ Changes to the schedule and configuration entities are stored as drafts.
 Press **Save Configuration** to send them to the device, or **Discard Draft**
 to abandon the edits. Direct service calls provide another way to configure
 devices.
+
+### Pairing switch
+
+Each gateway has a `Pairing` switch (on its "MAX! CUL (host:port)" device).
+Turn it on to open the pairing window (60 s) and press the pairing button on the
+MAX! device; it turns itself off when the window ends, or turn it off to stop
+early. It is the entity version of `cul_max.start_pairing` (the service still
+allows other durations). With several gateways every Cube has its own switch.
 
 ### Window contacts
 
@@ -571,3 +581,26 @@ The reference files include these author and copyright notices:
 Home Assistant uses the `documentation` field in [manifest.json](manifest.json)
 to link to this integration's documentation. It currently points to the
 [English repository README](https://github.com/thnow/MAX-via-Cul/blob/main/README.md).
+
+## Multiple gateways (several Cubes / CULs)
+
+Since 0.2.0 you can add the integration once per gateway (Settings → Devices & services → Add integration).
+
+- Every gateway has its **own device store** and its own connection; entities always talk to the gateway they belong to.
+- Use a **different "own address"** per gateway (the config flow proposes a free one). Thermostats that can be heard by two gateways with the same address would be handled twice.
+- Services exist once. With several gateways they are routed automatically to the gateway that knows the given device (`address`, `entity_id`, `device_name`, …). For services without a device (`start_pairing`, `export_topology`, `import_topology`, `cleanup_superseded_devices`, `create_virtual_shutter_contact`) set the optional field `config_entry_id` (entry id, host or `host:port`). `wake_thermostats` and `sync_time` without a device run on all gateways.
+- A call that mixes devices of different gateways is rejected; call it once per gateway.
+
+### Migrating from 0.1.x with several entries
+
+Older versions kept all gateways in one shared file (`.storage/cul_max_devices`), so its device list is mixed. On first start it is imported into the **oldest** config entry only; the other entries start empty. Recommended clean migration:
+
+1. Update, restart Home Assistant.
+2. Remove the entries whose devices do not belong to them (or delete all three entries), restart.
+3. Add the three gateways again (distinct own address each) and pair the thermostats at the gateway that should control them (`cul_max.start_pairing` with `config_entry_id`).
+
+## Changelog
+
+- **0.4.0** – New `Pairing` switch per gateway (entity version of `start_pairing`).
+- **0.3.0** – `valve_position` is now its own sensor entity (`Valve Position`, %, radiator thermostats only) instead of a climate attribute. Update templates/dashboards that read `state_attr('climate.x', 'valve_position')`.
+- **0.2.0** – Multiple gateways (one config entry per Cube/CUL).

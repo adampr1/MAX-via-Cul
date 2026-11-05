@@ -8,11 +8,18 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
-from homeassistant.core import CoreState, HomeAssistant, ServiceCall, SupportsResponse
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import (
+    CoreState,
+    HomeAssistant,
+    ServiceCall,
+    SupportsResponse,
+    valid_entity_id,
+)
+from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -28,6 +35,8 @@ from .const import (
     MODE_MANUAL,
     MODE_VACATION,
     PLATFORMS,
+    STORAGE_KEY,
+    STORAGE_VERSION,
 )
 from .coordinator import CulMaxCoordinator
 from .frontend import async_register_frontend
@@ -293,6 +302,57 @@ def _parse_until_value(hass: HomeAssistant, raw: str) -> datetime:
     return parsed
 
 
+# ---------------------------------------------------------------------------
+# Multi-gateway support
+#
+# Every config entry is one CULFW gateway (MAX! Cube / CUNO / CUL) with its own
+# coordinator, its own device store and its own RF address.  Services are
+# registered ONCE per domain; a dispatcher routes each call to the gateway
+# that owns the referenced device(s), or to the gateway named by the optional
+# ``config_entry_id`` field.
+# ---------------------------------------------------------------------------
+
+CONF_CONFIG_ENTRY_ID = "config_entry_id"
+
+_HANDLERS_KEY = f"{DOMAIN}_service_handlers"  # service -> {entry_id: handler}
+_COORDINATORS_KEY = f"{DOMAIN}_coordinators"  # entry_id -> coordinator
+
+# Services that may safely run on every gateway when no device is referenced.
+BROADCAST_SERVICES = frozenset({"wake_thermostats", "sync_time"})
+
+
+def _storage_key_for_entry(entry: ConfigEntry) -> str:
+    """Return the per-gateway device-store key."""
+    return f"{STORAGE_KEY}_{entry.entry_id}"
+
+
+async def _async_migrate_legacy_store(
+    hass: HomeAssistant, entry: ConfigEntry, storage_key: str
+) -> None:
+    """Seed the per-gateway store from the old shared store (oldest entry only).
+
+    Older versions kept all gateways in one shared file, so its content can mix
+    devices of several gateways.  It is only imported into the oldest entry; the
+    old file is left untouched.
+    """
+    store = Store(hass, STORAGE_VERSION, storage_key)
+    if await store.async_load():
+        return
+    entries = hass.config_entries.async_entries(DOMAIN)
+    if not entries or entries[0].entry_id != entry.entry_id:
+        return
+    legacy = await Store(hass, STORAGE_VERSION, STORAGE_KEY).async_load()
+    if not legacy:
+        return
+    await store.async_save(legacy)
+    _LOGGER.warning(
+        "Imported device list of the legacy shared store into gateway %s. "
+        "If you have several gateways, devices of the other gateways may be "
+        "listed here too; see the README (multi-gateway migration).",
+        entry.title,
+    )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: CulMaxConfigEntry) -> bool:
     """Set up MAX! via CUL from a config entry."""
     host = entry.data[CONF_HOST]
@@ -304,25 +364,224 @@ async def async_setup_entry(hass: HomeAssistant, entry: CulMaxConfigEntry) -> bo
     except ValueError:
         own_address = DEFAULT_OWN_ADDRESS
 
+    storage_key = _storage_key_for_entry(entry)
+    await _async_migrate_legacy_store(hass, entry, storage_key)
+
     coordinator = CulMaxCoordinator(
         hass=hass,
         host=host,
         port=port,
         own_address=own_address,
+        storage_key=storage_key,
     )
 
     if not await coordinator.async_setup():
         raise ConfigEntryNotReady(f"Cannot connect to CULFW at {host}:{port}")
 
     entry.runtime_data = coordinator
+    hass.data.setdefault(_COORDINATORS_KEY, {})[entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    _register_services(hass, coordinator)
+    _register_services(hass, entry.entry_id, coordinator)
     return True
 
 
-def _register_services(hass: HomeAssistant, coordinator: CulMaxCoordinator) -> None:
-    """Register integration-level services."""
+def _extend_schema(schema: vol.Schema | None) -> vol.Schema:
+    """Add the optional gateway selector to a service schema."""
+    extra = {vol.Optional(CONF_CONFIG_ENTRY_ID): cv.string}
+    if schema is None:
+        return vol.Schema(extra)
+    return schema.extend(extra)
+
+
+def _entry_label(hass: HomeAssistant, entry_id: str) -> str:
+    entry = hass.config_entries.async_get_entry(entry_id)
+    return f"{entry.title} [{entry_id}]" if entry else entry_id
+
+
+def _match_entry(hass: HomeAssistant, requested: str, handlers: dict) -> str | None:
+    """Match config_entry_id given as entry id, host, host:port or title."""
+    needle = requested.strip().casefold()
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if entry.entry_id not in handlers:
+            continue
+        host = str(entry.data.get(CONF_HOST, ""))
+        port = entry.data.get(CONF_PORT, DEFAULT_PORT)
+        candidates = {entry.entry_id, host, f"{host}:{port}", entry.title}
+        if needle in {c.casefold() for c in candidates if c}:
+            return entry.entry_id
+    return None
+
+
+def _collect_references(data: dict) -> tuple[list[str], list[str], list[str]]:
+    """Split service data into referenced addresses, entity ids and device names."""
+    addresses: list[str] = []
+    entity_ids: list[str] = []
+    names: list[str] = []
+    for key, value in data.items():
+        if key == CONF_CONFIG_ENTRY_ID:
+            continue
+        values = value if isinstance(value, (list, tuple)) else [value]
+        strings = [v.strip() for v in values if isinstance(v, str) and v.strip()]
+        if key.endswith(("address", "addresses")):
+            addresses.extend(strings)
+        elif key.endswith(("entity_id", "entity_ids")):
+            entity_ids.extend(s for s in strings if valid_entity_id(s))
+        elif key.endswith(("device_name", "device_names", "partner_name")):
+            names.extend(strings)
+    return addresses, entity_ids, names
+
+
+def _find_owner_entries(
+    hass: HomeAssistant, handlers: dict, data: dict
+) -> set[str]:
+    """Return the entry ids whose gateway knows the devices referenced in data."""
+    coordinators: dict[str, CulMaxCoordinator] = {
+        entry_id: coordinator
+        for entry_id, coordinator in hass.data.get(_COORDINATORS_KEY, {}).items()
+        if entry_id in handlers
+    }
+    addresses, entity_ids, names = _collect_references(data)
+
+    for entity_id in entity_ids:
+        resolved = _resolve_device_address_from_entity_id(hass, entity_id)
+        if resolved:
+            addresses.append(resolved)
+
+    owners: set[str] = set()
+    for entry_id, coordinator in coordinators.items():
+        if any(coordinator.get_device(address) is not None for address in addresses):
+            owners.add(entry_id)
+
+    for name in names:
+        needle = name.casefold()
+        exact = {
+            entry_id
+            for entry_id, coordinator in coordinators.items()
+            if any(d.name.strip().casefold() == needle for d in coordinator.get_all_devices())
+        }
+        if exact:
+            owners |= exact
+            continue
+        owners |= {
+            entry_id
+            for entry_id, coordinator in coordinators.items()
+            if any(needle in d.name.strip().casefold() for d in coordinator.get_all_devices())
+        }
+    return owners
+
+
+def _select_target_entries(
+    hass: HomeAssistant, service_name: str, call: ServiceCall, handlers: dict
+) -> list[str]:
+    """Decide which gateway(s) a service call is meant for."""
+    if not handlers:
+        raise ServiceValidationError("No MAX! via CUL gateway is loaded.")
+
+    requested = call.data.get(CONF_CONFIG_ENTRY_ID)
+    available = ", ".join(_entry_label(hass, entry_id) for entry_id in handlers)
+    if requested:
+        matched = _match_entry(hass, str(requested), handlers)
+        if matched is None:
+            raise ServiceValidationError(
+                f"Unknown MAX! gateway '{requested}'. Available: {available}"
+            )
+        return [matched]
+
+    if len(handlers) == 1:
+        return list(handlers)
+
+    owners = _find_owner_entries(hass, handlers, call.data)
+    if len(owners) == 1:
+        return list(owners)
+    if len(owners) > 1:
+        raise ServiceValidationError(
+            "The referenced devices belong to different MAX! gateways "
+            f"({', '.join(_entry_label(hass, e) for e in owners)}). "
+            "Call the service once per gateway or set config_entry_id."
+        )
+    if service_name in BROADCAST_SERVICES:
+        return list(handlers)
+    raise ServiceValidationError(
+        "Several MAX! gateways are configured and no known device was referenced. "
+        f"Set config_entry_id (entry id, host or host:port). Available: {available}"
+    )
+
+
+def _merge_service_results(results: list) -> dict[str, object] | None:
+    """Combine responses of several gateways (lists are joined, counts summed)."""
+    results = [r for r in results if r is not None]
+    if not results:
+        return None
+    if len(results) == 1:
+        return results[0]
+    merged: dict[str, object] = {}
+    for result in results:
+        for key, value in result.items():
+            if key not in merged:
+                merged[key] = list(value) if isinstance(value, list) else value
+            elif isinstance(value, list) and isinstance(merged[key], list):
+                merged[key].extend(value)
+            elif (
+                isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and isinstance(merged[key], (int, float))
+                and not isinstance(merged[key], bool)
+            ):
+                merged[key] += value
+    return merged
+
+
+def _make_dispatcher(hass: HomeAssistant, service_name: str):
+    """Build the single domain-level handler that routes to a gateway."""
+
+    async def _dispatch(call: ServiceCall) -> dict[str, object] | None:
+        handlers = hass.data.get(_HANDLERS_KEY, {}).get(service_name, {})
+        results = []
+        for entry_id in _select_target_entries(hass, service_name, call, handlers):
+            results.append(await handlers[entry_id](call))
+        return _merge_service_results(results)
+
+    return _dispatch
+
+
+def _add_service_handler(
+    hass: HomeAssistant,
+    entry_id: str,
+    service_name: str,
+    handler,
+    schema: vol.Schema | None,
+    supports_response: SupportsResponse,
+) -> None:
+    """Remember a gateway's handler and make sure the dispatcher is registered."""
+    handlers = hass.data.setdefault(_HANDLERS_KEY, {}).setdefault(service_name, {})
+    handlers[entry_id] = handler
+    if hass.services.has_service(DOMAIN, service_name):
+        return
+    hass.services.async_register(
+        DOMAIN,
+        service_name,
+        _make_dispatcher(hass, service_name),
+        schema=_extend_schema(schema),
+        supports_response=supports_response,
+    )
+
+
+def _remove_entry_services(hass: HomeAssistant, entry_id: str) -> None:
+    """Forget one gateway's handlers; drop a service when no gateway is left."""
+    registry: dict[str, dict] = hass.data.get(_HANDLERS_KEY, {})
+    for service_name in list(registry):
+        registry[service_name].pop(entry_id, None)
+        if not registry[service_name]:
+            registry.pop(service_name)
+            hass.services.async_remove(DOMAIN, service_name)
+    hass.data.get(_COORDINATORS_KEY, {}).pop(entry_id, None)
+
+
+def _register_services(
+    hass: HomeAssistant, entry_id: str, coordinator: CulMaxCoordinator
+) -> None:
+    """Register this gateway's service handlers (routed by the dispatcher)."""
 
     def _register(
         service_name: str,
@@ -331,13 +590,9 @@ def _register_services(hass: HomeAssistant, coordinator: CulMaxCoordinator) -> N
         schema: vol.Schema | None = None,
         supports_response: SupportsResponse = SupportsResponse.NONE,
     ) -> None:
-        """Register a service under the integration domain."""
-        hass.services.async_register(
-            DOMAIN,
-            service_name,
-            handler,
-            schema=schema,
-            supports_response=supports_response,
+        """Register this gateway's handler for a domain-level service."""
+        _add_service_handler(
+            hass, entry_id, service_name, handler, schema, supports_response
         )
 
     def _device_payload(address: str | None) -> dict[str, object] | None:
@@ -1416,11 +1671,13 @@ def _register_services(hass: HomeAssistant, coordinator: CulMaxCoordinator) -> N
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: CulMaxConfigEntry) -> bool:
-    """Unload the config entry and close serial connection."""
+    """Unload one gateway; other gateways and shared services keep running."""
     coordinator: CulMaxCoordinator = entry.runtime_data
     await coordinator.async_shutdown()
-    # Only remove services if no other entries are still loaded
-    if not hass.config_entries.async_entries(DOMAIN):
-        for service_name in SERVICE_NAMES:
-            hass.services.async_remove(DOMAIN, service_name)
+    _remove_entry_services(hass, entry.entry_id)
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: CulMaxConfigEntry) -> None:
+    """Delete the gateway's own device store when the entry is removed."""
+    await Store(hass, STORAGE_VERSION, _storage_key_for_entry(entry)).async_remove()

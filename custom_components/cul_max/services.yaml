@@ -4,6 +4,14 @@ start_pairing:
     Aktiviert den Pairing-Modus fuer eine frei waehbare Dauer.
     Drücke danach den Pairing-Knopf am MAX!-Gerät um es anzumelden.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     duration:
       name: Dauer
       description: Pairing-Fenster in Sekunden, Standard 60
@@ -18,6 +26,14 @@ set_device_name:
   name: Gerätename setzen
   description: Ändert den Anzeigenamen eines bekannten MAX!-Geräts.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -48,6 +64,15 @@ wake_thermostats:
     State-Updates oder Konfigurationsschritte zu triggern. Nicht fuer den
     Dauerbetrieb gedacht, da haeufiges Wecken Batterielaufzeit und Funklast
     erhoeht.
+  fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
 
 sync_time:
   name: Uhrzeit synchronisieren
@@ -57,6 +82,14 @@ sync_time:
     Wochenprogramme nicht zum aktuellen Wochentag oder zur Uhrzeit zu passen
     scheinen.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -101,6 +134,14 @@ set_week_profile:
     Setzt ein Wochenprofil fuer ein Thermostat oder Wandthermostat.
     Format pro Zeile: "Mon 21,06:00,17,22:00,16"
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -136,6 +177,14 @@ set_week_profile_days:
     Pro Feld nur den Tagesinhalt eingeben, zum Beispiel "21,08:00,26,22:00,13".
     Leer gelassene Tage bleiben unveraendert.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -196,6 +245,14 @@ set_group_id:
     Schreibt eine MAX!-Gruppen-ID direkt in ein Geraet. Geraete im selben Raum
     sollten dieselbe Gruppen-ID erhalten.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -230,6 +287,14 @@ set_temperature_config:
     Schreibt die gespeicherten Komfort-, Eco- und Fenster-offen-Werte eines
     Thermostats oder Wandthermostats. Nicht angegebene Felder bleiben unveraendert.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -307,6 +372,14 @@ set_desired_temperature:
     Ohne expliziten Modus kann mit `keep_auto` das aktuelle Wochenprogramm
     respektiert werden.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -365,6 +438,14 @@ remove_group_id:
   name: Gruppen-ID entfernen
   description: Entfernt die direkte MAX!-Gruppen-ID aus einem Gerät.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des Geräts (z.B. 1A2B3C)
@@ -389,6 +470,14 @@ add_link_partner:
     Legt eine direkte MAX!-Assoziation zwischen zwei Geräten an.
     Für eine saubere Raumkopplung ist meist auch die Gegenrichtung sinnvoll.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Quelle Adresse
       description: 6-stellige Hex-Adresse des Quellgeräts
@@ -428,6 +517,14 @@ remove_link_partner:
   name: Link-Partner entfernen
   description: Entfernt eine direkte MAX!-Assoziation zwischen zwei Geräten.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Quelle Adresse
       description: 6-stellige Hex-Adresse des Quellgeräts
@@ -470,6 +567,14 @@ associate_devices:
     angegebenen Geräten an. Das bildet eine echte MAX!-Raumkopplung auf
     Geräteebene ab.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: Einzelne 6-stellige Hex-Adresse
@@ -531,6 +636,14 @@ deassociate_devices:
     Entfernt Link-Partner zwischen allen angegebenen Geräten.
     Optional können die Gruppen-IDs zusätzlich gelöscht werden.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: Einzelne 6-stellige Hex-Adresse
@@ -588,6 +701,14 @@ create_virtual_shutter_contact:
     Dieser kann anschliessend per Gruppen-ID und Assoziation mit Thermostaten
     verbunden und von externen Sensoren angesteuert werden.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: Frei waehlbare 6-stellige Hex-Adresse, z.B. A1B2C3
@@ -614,6 +735,14 @@ delete_virtual_device:
   name: Virtuelles Gerät löschen
   description: Löscht ein zuvor angelegtes virtuelles MAX!-Gerät.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des virtuellen Geräts
@@ -641,6 +770,14 @@ send_virtual_shutter_contact_state:
     Bei gesetzter Gruppen-ID wirkt das Telegramm auf die zugeordneten Geräte
     derselben Gruppe und kann z.B. aus IKEA-Zigbee-Automationen aufgerufen werden.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     address:
       name: Adresse
       description: 6-stellige Hex-Adresse des virtuellen Fensterkontakts
@@ -673,6 +810,14 @@ create_room_association:
     zwischen den angegebenen Geräten und optional direkt einen virtuellen
     Fensterkontakt für externe Sensoren.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     room_name:
       name: Raumname
       description: Anzeigename fuer Logging und optionale virtuelle Kontakte
@@ -792,6 +937,14 @@ delete_room_association:
     optional Gruppen-ID loeschen und virtuelle Fensterkontakte gleich mit
     entfernen.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     room_name:
       name: Raumname
       description: Nur fuer Logging und Nachvollziehbarkeit
@@ -897,6 +1050,14 @@ rebuild_room_association:
     neuen Parametern erneut auf. Praktisch bei Reparaturen oder wenn man
     Gruppenbeziehungen sauber neu schreiben will.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     room_name:
       name: Raumname
       description: Anzeigename fuer Logging und optionale virtuelle Kontakte
@@ -1026,6 +1187,14 @@ export_topology:
     bekannten Geräte, Gruppen-IDs, Link-Partner, Wochenprofile und virtuelle
     Kontakte.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     path:
       name: Dateipfad
       description: >
@@ -1042,6 +1211,14 @@ import_topology:
     vorhandene Geräte werden aktualisiert, fehlende virtuelle Kontakte können
     angelegt werden, unbekannte physische Geräte werden jedoch nicht erzeugt.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     path:
       name: Dateipfad
       description: >
@@ -1089,6 +1266,14 @@ cleanup_superseded_devices:
     aus Home Assistant mit entfernt werden. Standardmaessig laeuft der Service
     zuerst als Dry-Run und loggt nur, was aufgeraeumt wuerde.
   fields:
+    config_entry_id:
+      name: Gateway
+      description: >
+        Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways.
+        Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist.
+      selector:
+        config_entry:
+          integration: cul_max
     dry_run:
       name: Nur pruefen
       description: Wenn aktiv, werden nur die Kandidaten geloggt und nichts geloescht

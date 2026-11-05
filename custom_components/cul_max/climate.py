@@ -235,7 +235,6 @@ class CulMaxClimate(ClimateEntity):
             if effective_week_profile != self._device.week_profile:
                 attrs["week_profile_source"] = "linked_partner"
         if self._state and hasattr(self._state, 'valve_position'):
-            attrs["valve_position"] = self._state.valve_position
             attrs["battery_low"] = self._state.battery_low
             attrs["rf_error"] = self._state.rf_error
             attrs["panel_locked"] = self._state.panel_locked

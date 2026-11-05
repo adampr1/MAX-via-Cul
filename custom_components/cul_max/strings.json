@@ -26,6 +26,10 @@
         "duration": {
           "name": "Dauer",
           "description": "Pairing-Fenster in Sekunden, Standard 60"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -48,12 +52,22 @@
         "name": {
           "name": "Name",
           "description": "Neuer Anzeigename"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
     "wake_thermostats": {
       "name": "Thermostate wecken",
-      "description": "Sendet WakeUp-Befehle manuell an alle bekannten Thermostate, um sofortige State-Updates oder Konfigurationsschritte zu triggern. Nicht fuer den Dauerbetrieb gedacht, da haeufiges Wecken Batterielaufzeit und Funklast erhoeht."
+      "description": "Sendet WakeUp-Befehle manuell an alle bekannten Thermostate, um sofortige State-Updates oder Konfigurationsschritte zu triggern. Nicht fuer den Dauerbetrieb gedacht, da haeufiges Wecken Batterielaufzeit und Funklast erhoeht.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
+        }
+      }
     },
     "sync_time": {
       "name": "Uhrzeit synchronisieren",
@@ -82,6 +96,10 @@
         "device_names": {
           "name": "Geraetenamen",
           "description": "Alternativ mehrere gespeicherte MAX!-Geraetenamen angeben"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -104,6 +122,10 @@
         "profile": {
           "name": "Wochenprofil",
           "description": "Eine oder mehrere Zeilen im Format \"Mon 21,06:00,17,22:00,16\". Nicht angegebene Tage bleiben unverändert."
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -150,6 +172,10 @@
         "sunday": {
           "name": "Sonntag",
           "description": "Format z.B. \"21,08:00,26,22:00,13\""
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -172,6 +198,10 @@
         "group_id": {
           "name": "Gruppen-ID",
           "description": "Ganzzahl zwischen 1 und 255"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -210,6 +240,10 @@
         "measurement_offset": {
           "name": "Temperatur-Offset",
           "description": "Offset des internen Temperatursensors in Grad Celsius"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -244,6 +278,10 @@
         "until": {
           "name": "Gueltig bis",
           "description": "Optionaler Zeitpunkt fuer einen temporaeren Sollwert. Format z. B. `2026-04-06 22:30` oder `06.04.2026 22:30`. MAX! erlaubt nur `:00` oder `:30`."
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -262,6 +300,10 @@
         "device_name": {
           "name": "Geraetename",
           "description": "Alternativ den gespeicherten MAX!-Geraetenamen angeben"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -292,6 +334,10 @@
         "partner_name": {
           "name": "Partner Geraetename",
           "description": "Alternativ den gespeicherten Namen des Partnergeräts angeben"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -322,6 +368,10 @@
         "partner_name": {
           "name": "Partner Geraetename",
           "description": "Alternativ den gespeicherten Namen des Partnergeräts angeben"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -360,6 +410,10 @@
         "bidirectional": {
           "name": "Bidirektional",
           "description": "Legt die Assoziation in beide Richtungen an"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -398,6 +452,10 @@
         "bidirectional": {
           "name": "Bidirektional",
           "description": "Entfernt die Assoziation in beide Richtungen"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -416,6 +474,10 @@
         "group_id": {
           "name": "Gruppen-ID",
           "description": "Optionale MAX!-Gruppen-ID zwischen 0 und 255"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -434,6 +496,10 @@
         "device_name": {
           "name": "Geraetename",
           "description": "Alternativ den gespeicherten Namen des virtuellen Geraets angeben"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -456,6 +522,10 @@
         "is_open": {
           "name": "Fenster offen",
           "description": "true fuer offen, false fuer geschlossen"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -534,6 +604,10 @@
         "bidirectional": {
           "name": "Bidirektional",
           "description": "Legt die Link-Partner in beide Richtungen an"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -604,6 +678,10 @@
         "bidirectional": {
           "name": "Bidirektional",
           "description": "Entfernt Link-Partner in beide Richtungen"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -690,6 +768,10 @@
         "bidirectional": {
           "name": "Bidirektional",
           "description": "Nutzt Link-Partner in beide Richtungen"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -700,6 +782,10 @@
         "path": {
           "name": "Dateipfad",
           "description": "Optionaler JSON-Zielpfad. Relative Pfade werden unterhalb des Home-Assistant-Konfigurationsverzeichnisses gespeichert."
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -734,6 +820,10 @@
         "apply_week_profiles": {
           "name": "Wochenprofile anwenden",
           "description": "Spielt gespeicherte Wochenprofile fuer Klima-Geraete wieder ein"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     },
@@ -752,6 +842,10 @@
         "remove_discovered_devices": {
           "name": "Entdeckte Geraete entfernen",
           "description": "Entfernt auch als entdeckt markierte, nicht gekoppelte Altgeraete"
+        },
+        "config_entry_id": {
+          "name": "Gateway",
+          "description": "Nur bei mehreren Gateways (Cubes): Eintrags-ID, Host oder Host:Port des Gateways. Wird automatisch erkannt, sobald ein bekanntes Gerät angegeben ist."
         }
       }
     }

@@ -156,6 +156,8 @@ Je nach Geraetetyp stellt die Integration mehrere Entitaeten bereit.
 Fuer Heizkoerper- und Wandthermostate:
 
 - `climate`-Entitaet fuer Solltemperatur und HVAC-Modus
+- nur Heizkoerperthermostate: Sensor `Valve Position` (0-100 %). Er ersetzt das
+  bisherige Attribut `valve_position` der `climate`-Entitaet (ab 0.3.0)
 - `text`-Entitaet fuer Wochenprofile
 - `number`-Entitaeten fuer Komfort-/Tagtemperatur, Eco-/Nachttemperatur,
   Fenster-offen-Temperatur und Fenster-offen-Dauer
@@ -172,6 +174,15 @@ Hinweis zur Sollwert-Semantik:
   `mode_detail` und `mode_is_temporary` zur Verfuegung. Damit laesst sich
   besser erkennen, ob ein Thermostat gerade wirklich im normalen
   Wochenprogramm laeuft oder in einem temporaeren Geraetezustand steckt.
+
+### Pairing-Schalter
+
+Jedes Gateway hat einen Schalter `Pairing` (am Geraet "MAX! CUL (host:port)").
+Einschalten oeffnet das Pairing-Fenster (60 s); danach den Pairing-Knopf am
+MAX!-Geraet druecken. Der Schalter geht nach Ablauf von selbst aus, oder
+manuell ausschalten zum vorzeitigen Beenden. Entspricht dem Service
+`cul_max.start_pairing` (der Service erlaubt weiterhin andere Dauern). Bei
+mehreren Gateways hat jeder Cube seinen eigenen Schalter.
 
 ### Fensterkontakte
 
@@ -825,3 +836,9 @@ Sobald das Projekt in GitHub liegt, sollte dieses Feld auf die echte README oder
 ```json
 "documentation": "https://github.com/DEIN-NAME/cul_max/blob/main/README.md"
 ```
+
+## Changelog
+
+- **0.4.0** – Neuer Schalter `Pairing` pro Gateway (Entitaets-Variante von `start_pairing`).
+- **0.3.0** – `valve_position` ist jetzt eine eigene Sensor-Entitaet (`Valve Position`, %, nur Heizkoerperthermostate) statt eines climate-Attributs. Templates/Dashboards mit `state_attr('climate.x', 'valve_position')` anpassen.
+- **0.2.0** – Mehrere Gateways (ein Config-Eintrag pro Cube/CUL).

@@ -63,13 +63,23 @@ class CulMaxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data=user_input,
                 )
 
+        # Every gateway is its own RF master: propose a distinct own address
+        # (default + number of already configured gateways).
+        used = {
+            str(e.data.get(CONF_OWN_ADDRESS, "")).upper()
+            for e in self._async_current_entries()
+        }
+        proposal = DEFAULT_OWN_ADDRESS
+        while f"{proposal:06X}" in used:
+            proposal += 1
+
         schema = vol.Schema(
             {
                 vol.Required(CONF_HOST): str,
                 vol.Required(CONF_PORT, default=DEFAULT_PORT): vol.Coerce(int),
                 vol.Optional(
                     CONF_OWN_ADDRESS,
-                    default=f"{DEFAULT_OWN_ADDRESS:06X}",
+                    default=f"{proposal:06X}",
                 ): str,
             }
         )

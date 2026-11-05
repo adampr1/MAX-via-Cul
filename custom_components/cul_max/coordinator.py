@@ -337,6 +337,7 @@ class CulMaxCoordinator:
         host: str,
         port: int = DEFAULT_PORT,
         own_address: int = DEFAULT_OWN_ADDRESS,
+        storage_key: str = STORAGE_KEY,
     ) -> None:
         self.hass = hass
         self.host = host
@@ -371,7 +372,7 @@ class CulMaxCoordinator:
         self._cul_credit_updated_at: float = 0.0
 
         self._devices: dict[str, KnownDevice] = {}
-        self._store: Store = Store(hass, STORAGE_VERSION, STORAGE_KEY)
+        self._store: Store = Store(hass, STORAGE_VERSION, storage_key)
 
         # Per-device listeners: address -> [callback(MaxMessage, decoded)]
         self._listeners: dict[str, list[Callable]] = {}
@@ -901,6 +902,9 @@ class CulMaxCoordinator:
         """Close the TCP connection cleanly."""
         self._shutting_down = True
         self._reconnecting = False
+        if self._pairing_task:
+            self._pairing_task.cancel()
+            self._pairing_task = None
         if self._polling_task:
             self._polling_task.cancel()
             try:
@@ -1339,6 +1343,18 @@ class CulMaxCoordinator:
             self._pairing_task.cancel()
         self._notify_pairing_state_updated()
         self._pairing_task = self.hass.loop.create_task(self._pairing_timeout(duration))
+
+    async def async_stop_pairing(self) -> None:
+        """Leave pairing mode immediately (no-op if it is not active)."""
+        if self._pairing_task:
+            self._pairing_task.cancel()
+            self._pairing_task = None
+        if not self._pairing_mode:
+            return
+        self._pairing_mode = False
+        self._pairing_until = None
+        _LOGGER.info("MAX! pairing mode stopped")
+        self._notify_pairing_state_updated()
 
     async def _pairing_timeout(self, duration: int) -> None:
         await asyncio.sleep(duration)
